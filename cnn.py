@@ -24,6 +24,7 @@ from keras.layers import Dense, Dropout, Activation, Flatten
 from keras.layers import Convolution2D, MaxPooling2D
 from keras.utils import np_utils
 from keras import backend as K
+import keras
 
 batch_size = 30
 nb_classes = 8
@@ -47,7 +48,7 @@ with open(dataset_path, 'rb') as pickled_dataset:
 img_rows, img_cols = data_obj['img_dim']['width'], data_obj['img_dim']['height']
 
 #checks if backend is theano or tensorflow for dataset format
-if K.image_dim_ordering() == 'th':
+if keras.backend.image_data_format() == 'th':
     X_train = X_train.reshape(X_train.shape[0], 1, img_rows, img_cols)
     X_test = X_test.reshape(X_test.shape[0], 1, img_rows, img_cols)
     input_shape = (1, img_rows, img_cols)
@@ -69,7 +70,7 @@ model = Sequential()
 
 #adding 2 Convolutional Layers and a maxpooling layer with activation function rectified linear unit and  Dropout for regularization
 model.add(Convolution2D(nb_filters, kernel_size[0], kernel_size[1],
-                        border_mode='valid',
+                        padding='valid',
                         input_shape=input_shape))
 model.add(Activation('relu'))
 model.add(Convolution2D(nb_filters, kernel_size[0], kernel_size[1]))
@@ -91,7 +92,7 @@ model.compile(loss='categorical_crossentropy',
               metrics=['accuracy'])
 
 #training
-model.fit(X_train, Y_train, batch_size=batch_size, nb_epoch=nb_epoch,
+model.fit(X_train, Y_train, batch_size=batch_size, epochs=nb_epoch,
           verbose=1, validation_data=(X_test, Y_test))
 score = model.evaluate(X_test, Y_test, verbose=0)
 print('Test score:', score[0])
